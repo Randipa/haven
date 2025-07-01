@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { FaPaw, FaCheckCircle, FaTimesCircle, FaChartBar } from 'react-icons/fa';
+import { FaPaw, FaCheckCircle, FaTimesCircle, FaChartBar, FaUsers } from 'react-icons/fa';
 import axiosInstance from '../../api/axiosConfig';
 import BarChartComponent from './BarChart';
 import PieChartComponent from './PieChart';
+import UserRolePieChart from './UserRolePieChart';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -10,7 +11,10 @@ const AdminDashboard = () => {
     totalPets: 0,
     pendingRequests: 0,
     approvedRequests: 0,
-    rejectedRequests: 0
+    rejectedRequests: 0,
+    totalUsers: 0,
+    adminCount: 0,
+    userCount: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,20 +27,28 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      
-      const petsResponse = await axiosInstance.get("/pets/getAll");
+
+      const [petsResponse, userStatsResponse] = await Promise.all([
+        axiosInstance.get("/pets/getAll"),
+        axiosInstance.get("/admin/stats/users")
+      ]);
+
       const pets = petsResponse.data;
-      
+      const userStats = userStatsResponse.data;
+
       const totalPets = pets.length;
       const approvedRequests = pets.filter(pet => pet.regStatus === "Approved").length;
       const rejectedRequests = pets.filter(pet => pet.regStatus === "Rejected").length;
       const pendingRequests = pets.filter(pet => !pet.regStatus || pet.regStatus === "Pending").length;
-      
+
       setDashboardData({
         totalPets,
         pendingRequests,
         approvedRequests,
-        rejectedRequests
+        rejectedRequests,
+        totalUsers: userStats.totalUsers,
+        adminCount: userStats.adminCount,
+        userCount: userStats.userCount
       });
       
       setError(null);
@@ -122,6 +134,12 @@ const AdminDashboard = () => {
           value={dashboardData.rejectedRequests}
           color="danger"
         />
+        <StatCard
+          icon={<FaUsers className="admin-stat-icon-svg" />}
+          title="Total Users"
+          value={dashboardData.totalUsers}
+          color="primary"
+        />
       </div>
 
       {/* Main Content Area */}
@@ -151,7 +169,18 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-         
+          {/* User Role Distribution */}
+          <div className="admin-analytics-mini">
+            <h2 className="admin-section-title">
+              <FaChartBar className="admin-section-icon" /> User Roles
+            </h2>
+            <div className="admin-mini-charts">
+              <div className="admin-mini-chart">
+                <UserRolePieChart data={dashboardData} />
+              </div>
+            </div>
+          </div>
+
         </div>
 
         {/* Right Column */}
