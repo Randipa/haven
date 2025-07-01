@@ -16,9 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import com.example.PostApet.Enum.UserRole;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -104,17 +101,6 @@ public class UserService implements UserDetailsService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
-    }
-
-    public Map<String, Long> getUserRoleCounts() {
-        long adminCount = userRepository.findAllByUserRole(UserRole.ADMIN).size();
-        long userCount = userRepository.findAllByUserRole(UserRole.USER).size();
-
-        Map<String, Long> counts = new HashMap<>();
-        counts.put("adminCount", adminCount);
-        counts.put("userCount", userCount);
-        counts.put("totalUsers", adminCount + userCount);
-        return counts;
     }
 
 }
