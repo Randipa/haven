@@ -18,21 +18,17 @@ axiosInstance.interceptors.request.use(
         return Promise.reject(error);
     }
 );
-axiosInstance.interceptors.response.use(
+axios.interceptors.response.use(
     response => response,
     async error => {
         const originalRequest = error.config;
-        if (error.response && error.response.status === 401 && !originalRequest._retry) {
+        if (error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             const refreshToken = localStorage.getItem('refreshToken');
-            try {
-                const response = await axios.post('/api/v1/auth/refresh', { refreshToken });
-                localStorage.setItem('token', response.data.token);
-                originalRequest.headers['Authorization'] = 'Bearer ' + response.data.token;
-                return axiosInstance(originalRequest);
-            } catch (refreshError) {
-                return Promise.reject(refreshError);
-            }
+            const response = await axios.post('/api/v1/auth/refresh', { refreshToken });
+            localStorage.setItem('token', response.data.token);
+            originalRequest.headers['Authorization'] = 'Bearer ' + response.data.token;
+            return axios(originalRequest);
         }
         return Promise.reject(error);
     }
