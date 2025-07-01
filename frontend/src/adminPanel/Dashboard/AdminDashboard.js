@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaPaw, FaCheckCircle, FaTimesCircle, FaChartBar, FaUser } from 'react-icons/fa';
+import { FaPaw, FaCheckCircle, FaTimesCircle, FaChartBar } from 'react-icons/fa';
 import axiosInstance from '../../api/axiosConfig';
 import BarChartComponent from './BarChart';
 import PieChartComponent from './PieChart';
-import UserPieChart from './UserPieChart';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -12,11 +11,6 @@ const AdminDashboard = () => {
     pendingRequests: 0,
     approvedRequests: 0,
     rejectedRequests: 0
-  });
-  const [userMetrics, setUserMetrics] = useState({
-    adminCount: 0,
-    userCount: 0,
-    totalUsers: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,13 +23,9 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-
-      const [petsResponse, userMetricRes] = await Promise.all([
-        axiosInstance.get("/pets/getAll"),
-        axiosInstance.get("/admin/metrics/users")
-      ]);
+      
+      const petsResponse = await axiosInstance.get("/pets/getAll");
       const pets = petsResponse.data;
-      const userData = userMetricRes.data;
       
       const totalPets = pets.length;
       const approvedRequests = pets.filter(pet => pet.regStatus === "Approved").length;
@@ -48,7 +38,6 @@ const AdminDashboard = () => {
         approvedRequests,
         rejectedRequests
       });
-      setUserMetrics(userData);
       
       setError(null);
     } catch (error) {
@@ -133,12 +122,6 @@ const AdminDashboard = () => {
           value={dashboardData.rejectedRequests}
           color="danger"
         />
-        <StatCard
-          icon={<FaUser className="admin-stat-icon-svg" />}
-          title="Total Users"
-          value={userMetrics.totalUsers}
-          color="primary"
-        />
       </div>
 
       {/* Main Content Area */}
@@ -152,23 +135,17 @@ const AdminDashboard = () => {
             </h2>
             <div className="admin-mini-charts">
               <div className="admin-mini-chart">
-                <PieChartComponent
-                  data={dashboardData}
+                <PieChartComponent 
+                  data={dashboardData} 
                   title={null}
                   miniView={true}
                 />
               </div>
               <div className="admin-mini-chart">
-                <BarChartComponent
-                  data={dashboardData}
+                <BarChartComponent 
+                  data={dashboardData} 
                   title={null}
                   miniView={true}
-                />
-              </div>
-              <div className="admin-mini-chart">
-                <UserPieChart
-                  data={userMetrics}
-                  title={"User Roles"}
                 />
               </div>
             </div>
