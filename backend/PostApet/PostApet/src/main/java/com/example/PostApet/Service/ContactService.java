@@ -3,6 +3,7 @@ package com.example.PostApet.Service;
 import com.example.PostApet.Model.ContactMessage;
 import com.example.PostApet.Repository.ContactRepository;
 import com.example.PostApet.dto.ContactDto;
+import com.example.PostApet.Service.AdminActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,8 @@ import java.util.List;
 @Service
 public class ContactService {
     private final ContactRepository contactRepository;
+    @Autowired
+    private AdminActivityService adminActivityService;
 
     @Autowired
     public ContactService(ContactRepository contactRepository) {
@@ -36,5 +39,8 @@ public class ContactService {
                 .orElseThrow(() -> new RuntimeException("Message not found"));
         message.setResponded(true);
         contactRepository.save(message);
+        try {
+            adminActivityService.logActivity("Responded to contact message id " + id);
+        } catch (Exception ignored) {}
     }
 }

@@ -56,12 +56,12 @@ const AdminDashboard = () => {
 
   const fetchRecentActivity = async () => {
     try {
-      const resp = await axiosInstance.get('/pets/recent?limit=5');
-      const activity = resp.data.map(pet => ({
-        id: pet.id,
-        type: getActivityType(pet.regStatus),
-        message: getActivityMessage(pet),
-        time: new Date().toLocaleTimeString(),
+      const resp = await axiosInstance.get('/admin/activity/recent?limit=5');
+      const activity = resp.data.map(act => ({
+        id: act.id,
+        message: act.message,
+        time: new Date(act.createdAt).toLocaleTimeString(),
+        type: getActivityType(act.message)
       }));
       setDashboardData(prev => ({
         ...prev,
@@ -72,24 +72,14 @@ const AdminDashboard = () => {
     }
   };
 
-  const getActivityType = (status) => {
-    if (status === "Approved") return 'approval';
-    if (status === "Rejected") return 'rejection';
+  const getActivityType = (msg) => {
+    const lower = msg.toLowerCase();
+    if (lower.includes('approved')) return 'approval';
+    if (lower.includes('rejected')) return 'rejection';
+    if (lower.includes('responded')) return 'message';
     return 'request';
   };
 
-  const getActivityMessage = (pet) => {
-    const petName = pet.petName || `Pet ID ${pet.id}`;
-    const ownerName = pet.ownerName || 'Unknown Owner';
-    
-    if (pet.regStatus === "Approved") {
-      return `Pet adoption request approved for ${petName} by ${ownerName}`;
-    } else if (pet.regStatus === "Rejected") {
-      return `Pet adoption request rejected for ${petName} by ${ownerName}`;
-    } else {
-      return `New adoption request received for ${petName} from ${ownerName}`;
-    }
-  };
 
   const StatCard = ({ icon, title, value, color }) => (
     <div className={`admin-stat-card admin-stat-${color}`}>
