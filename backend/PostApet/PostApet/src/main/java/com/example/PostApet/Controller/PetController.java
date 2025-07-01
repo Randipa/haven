@@ -112,6 +112,12 @@ public class PetController {
         return petService.getAllPets();
     }
 
+    @GetMapping("/recent")
+    public ResponseEntity<List<PetDto>> getRecentPets(@RequestParam(defaultValue = "5") int limit) {
+        List<PetDto> pets = petService.getRecentPets(limit);
+        return ResponseEntity.ok(pets);
+    }
+
     @GetMapping("/get/{id}")
     public ResponseEntity<PetDto> getPetById(@PathVariable Long id) {
         PetDto pet = petService.getPetById(id);

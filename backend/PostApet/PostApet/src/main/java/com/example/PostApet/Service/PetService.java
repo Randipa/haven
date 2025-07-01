@@ -8,6 +8,8 @@ import com.example.PostApet.dto.PetDto;
 import com.example.PostApet.dto.QuizRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -95,6 +97,15 @@ public abstract class PetService {
 
     public List<PetDto> getRecentApprovedPets(int limit) {
         return petRepository.findTop8ByRegStatusOrderByIdDesc("Approved")
+                .stream()
+                .map(PetDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    public List<PetDto> getRecentPets(int limit) {
+        PageRequest request = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "id"));
+        return petRepository.findAll(request)
+                .getContent()
                 .stream()
                 .map(PetDto::fromEntity)
                 .collect(Collectors.toList());
