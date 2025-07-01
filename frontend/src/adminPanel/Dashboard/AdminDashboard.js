@@ -169,7 +169,7 @@ const AdminDashboard = () => {
               </div>
               <div className="admin-mini-chart">
                 <BarChartComponent
-                  data={userPetCounts}
+                  data={dashboardData}
                   title={null}
                   miniView={true}
                 />
