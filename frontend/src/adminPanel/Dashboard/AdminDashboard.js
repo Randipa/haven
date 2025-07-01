@@ -3,7 +3,6 @@ import { FaPaw, FaCheckCircle, FaTimesCircle, FaChartBar } from 'react-icons/fa'
 import axiosInstance from '../../api/axiosConfig';
 import BarChartComponent from './BarChart';
 import PieChartComponent from './PieChart';
-import UserRoleBarChart from './UserRoleBarChart';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -12,11 +11,6 @@ const AdminDashboard = () => {
     pendingRequests: 0,
     approvedRequests: 0,
     rejectedRequests: 0
-  });
-  const [userStats, setUserStats] = useState({
-    totalUsers: 0,
-    adminCount: 0,
-    userCount: 0
   });
   const [userPetCounts, setUserPetCounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,12 +42,6 @@ const AdminDashboard = () => {
         approvedRequests,
         rejectedRequests
       });
-
-      const totalUsers = users.length;
-      const adminCount = users.filter(u => u.userRole === 'ADMIN').length;
-      const userCount = users.filter(u => u.userRole === 'USER').length;
-
-      setUserStats({ totalUsers, adminCount, userCount });
 
       // Calculate pet count per user
       const counts = users.map(u => {
@@ -176,21 +164,6 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
-
-          <div className="admin-analytics-mini">
-            <h2 className="admin-section-title">
-              <FaChartBar className="admin-section-icon" /> User Roles
-            </h2>
-            <div className="admin-mini-charts">
-              <div className="admin-mini-chart">
-                <UserRoleBarChart
-                  data={userStats}
-                  title={null}
-                />
-              </div>
-            </div>
-          </div>
-
 
         </div>
 
