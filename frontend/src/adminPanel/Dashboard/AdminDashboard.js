@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPaw, FaUsers, FaEnvelope, FaCheckCircle, FaTimesCircle, FaChartBar } from 'react-icons/fa';
+import { FaPaw, FaCheckCircle, FaTimesCircle, FaChartBar } from 'react-icons/fa';
 import axiosInstance from '../../api/axiosConfig';
 import BarChartComponent from './BarChart';
 import PieChartComponent from './PieChart';
@@ -10,18 +10,14 @@ const AdminDashboard = () => {
     totalPets: 0,
     pendingRequests: 0,
     approvedRequests: 0,
-    rejectedRequests: 0,
-    totalMessages: 0,
-    recentActivity: []
+    rejectedRequests: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
-    fetchRecentActivity();
-    const interval = setInterval(fetchRecentActivity, 10000);
-    return () => clearInterval(interval);
+    // No recent activity section
   }, []);
 
   const fetchDashboardData = async () => {
@@ -36,14 +32,12 @@ const AdminDashboard = () => {
       const rejectedRequests = pets.filter(pet => pet.regStatus === "Rejected").length;
       const pendingRequests = pets.filter(pet => !pet.regStatus || pet.regStatus === "Pending").length;
       
-      setDashboardData(prev => ({
+      setDashboardData({
         totalPets,
         pendingRequests,
         approvedRequests,
-        rejectedRequests,
-        totalMessages: 0,
-        recentActivity: prev.recentActivity
-      }));
+        rejectedRequests
+      });
       
       setError(null);
     } catch (error) {
@@ -54,31 +48,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchRecentActivity = async () => {
-    try {
-      const resp = await axiosInstance.get('/admin/activity/recent?limit=5');
-      const activity = resp.data.map(act => ({
-        id: act.id,
-        message: act.message,
-        time: new Date(act.createdAt).toLocaleTimeString(),
-        type: getActivityType(act.message)
-      }));
-      setDashboardData(prev => ({
-        ...prev,
-        recentActivity: activity,
-      }));
-    } catch (err) {
-      console.error('Error fetching recent activity:', err);
-    }
-  };
-
-  const getActivityType = (msg) => {
-    const lower = msg.toLowerCase();
-    if (lower.includes('approved')) return 'approval';
-    if (lower.includes('rejected')) return 'rejection';
-    if (lower.includes('responded')) return 'message';
-    return 'request';
-  };
+  // Recent activity section removed
 
 
   const StatCard = ({ icon, title, value, color }) => (
@@ -93,38 +63,7 @@ const AdminDashboard = () => {
     </div>
   );
 
-  const ActivityItem = ({ activity }) => {
-    const getActivityIcon = (type) => {
-      switch (type) {
-        case 'approval':
-          return <FaCheckCircle className="admin-activity-icon admin-activity-approved" />;
-        case 'rejection':
-          return <FaTimesCircle className="admin-activity-icon admin-activity-rejected" />;
-        case 'request':
-          return <FaPaw className="admin-activity-icon admin-activity-pending" />;
-        case 'message':
-          return <FaEnvelope className="admin-activity-icon admin-activity-message" />;
-        default:
-          return <FaPaw className="admin-activity-icon" />;
-      }
-    };
-
-    return (
-      <div className="admin-activity-item">
-        {getActivityIcon(activity.type)}
-        <div className="admin-activity-content">
-          <p className="admin-activity-message">{activity.message}</p>
-          <span className="admin-activity-time">{activity.time}</span>
-        </div>
-      </div>
-    );
-  };
-
-  const handleQuickAction = (action) => {
-    if (action === 'messages') {
-      window.location.href = '/admin/messages';
-    }
-  };
+  // Activity list removed
 
   if (loading) {
     return (
@@ -217,20 +156,6 @@ const AdminDashboard = () => {
 
         {/* Right Column */}
         <div className="admin-dashboard-right">
-          {/* Recent Activity */}
-          <div className="admin-recent-activity">
-            <h2 className="admin-section-title">Recent Activity</h2>
-            <div className="admin-activity-list">
-              {dashboardData.recentActivity.length > 0 ? (
-                dashboardData.recentActivity.map(activity => (
-                  <ActivityItem key={activity.id} activity={activity} />
-                ))
-              ) : (
-                <p className="admin-no-activity">No recent activity found.</p>
-              )}
-            </div>
-          </div>
-
           {/* Summary Stats */}
           <div className="admin-summary-stats">
             <h2 className="admin-section-title">Key Metrics</h2>
