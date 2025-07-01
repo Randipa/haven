@@ -5,8 +5,6 @@ import com.example.PostApet.Model.User;
 import com.example.PostApet.Repository.UserRepository;
 import com.example.PostApet.Service.FileStorageService;
 import com.example.PostApet.Service.PetService;
-import com.example.PostApet.Service.ActivityService;
-import com.example.PostApet.dto.ActivityEvent;
 import com.example.PostApet.dto.PetDto;
 import com.example.PostApet.dto.QuizRequest;
 import com.example.PostApet.dto.UserDto;
@@ -31,13 +29,11 @@ public class PetController {
     private final PetService petService;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
-    private final ActivityService activityService;
 
-    public PetController(PetService petService, UserRepository userRepository, FileStorageService fileStorageService, ActivityService activityService) {
+    public PetController(PetService petService, UserRepository userRepository, FileStorageService fileStorageService) {
         this.petService = petService;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
-        this.activityService = activityService;
     }
 
 
@@ -107,13 +103,6 @@ public class PetController {
             petService.savePet(savedPet); // Update with photo path
         }
 
-        activityService.sendActivity(new ActivityEvent(
-                savedPet.getId(),
-                "request",
-                "New adoption request received for " + savedPet.getPetName() + " from " + savedPet.getOwnerName(),
-                java.time.LocalDateTime.now()
-        ));
-
         return ResponseEntity.ok("New pet added successfully");
     }
 
@@ -135,12 +124,6 @@ public class PetController {
             @RequestParam String status) {
         try {
             PetModel updatedPet = petService.updatePetStatus(id, status.trim());
-            activityService.sendActivity(new ActivityEvent(
-                    updatedPet.getId(),
-                    status.equalsIgnoreCase("Approved") ? "approval" : status.equalsIgnoreCase("Rejected") ? "rejection" : "update",
-                    "Pet " + updatedPet.getPetName() + " status changed to " + status,
-                    java.time.LocalDateTime.now()
-            ));
             return ResponseEntity.ok(updatedPet);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();

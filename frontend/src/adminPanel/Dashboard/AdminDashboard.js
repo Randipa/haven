@@ -21,21 +21,6 @@ const AdminDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  useEffect(() => {
-    const eventSource = new EventSource('http://localhost:8080/api/v1/activity/stream');
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setDashboardData((prev) => ({
-        ...prev,
-        recentActivity: [data, ...prev.recentActivity].slice(0, 5),
-      }));
-    };
-    eventSource.onerror = () => {
-      eventSource.close();
-    };
-    return () => eventSource.close();
-  }, []);
-
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
@@ -48,8 +33,14 @@ const AdminDashboard = () => {
       const rejectedRequests = pets.filter(pet => pet.regStatus === "Rejected").length;
       const pendingRequests = pets.filter(pet => !pet.regStatus || pet.regStatus === "Pending").length;
       
-      const activityResponse = await axiosInstance.get('/activity/recent');
-      const recentActivity = activityResponse.data;
+      const recentActivity = pets
+        .slice(0, 5)
+        .map((pet, index) => ({
+          id: pet.id,
+          type: getActivityType(pet.regStatus),
+          message: getActivityMessage(pet),
+          time: `${index + 1} ${index === 0 ? 'hour' : 'hours'} ago`
+        }));
 
       setDashboardData({
         totalPets,
