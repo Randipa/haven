@@ -13,6 +13,11 @@ const AdminDashboard = () => {
     rejectedRequests: 0
   });
   const [userPetCounts, setUserPetCounts] = useState([]);
+  const [messageMetrics, setMessageMetrics] = useState({
+    totalMessages: 0,
+    respondedMessages: 0,
+    pendingMessages: 0
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -27,9 +32,11 @@ const AdminDashboard = () => {
       
       const petsResponse = await axiosInstance.get("/pets/getAll");
       const usersResponse = await axiosInstance.get("/auth/users");
+      const messagesResponse = await axiosInstance.get("/contact/admin/messages");
 
       const pets = petsResponse.data;
       const users = usersResponse.data || [];
+      const messages = messagesResponse.data || [];
       
       const totalPets = pets.length;
       const approvedRequests = pets.filter(pet => pet.regStatus === "Approved").length;
@@ -41,6 +48,14 @@ const AdminDashboard = () => {
         pendingRequests,
         approvedRequests,
         rejectedRequests
+      });
+
+      const respondedMessages = messages.filter(m => m.responded).length;
+      const pendingMessages = messages.filter(m => !m.responded).length;
+      setMessageMetrics({
+        totalMessages: messages.length,
+        respondedMessages,
+        pendingMessages
       });
 
       // Calculate pet count per user
@@ -194,6 +209,26 @@ const AdminDashboard = () => {
                 <p className="admin-metric-description">
                   of requests processed
                 </p>
+              </div>
+            </div>
+          </div>
+          <div className="admin-summary-stats">
+            <h2 className="admin-section-title">Contact Messages</h2>
+            <div className="admin-metrics-grid">
+              <div className="admin-metric-card">
+                <h4>Total Messages</h4>
+                <p className="admin-metric-value">{messageMetrics.totalMessages}</p>
+                <p className="admin-metric-description">messages received</p>
+              </div>
+              <div className="admin-metric-card">
+                <h4>Responded</h4>
+                <p className="admin-metric-value">{messageMetrics.respondedMessages}</p>
+                <p className="admin-metric-description">messages responded</p>
+              </div>
+              <div className="admin-metric-card">
+                <h4>Pending</h4>
+                <p className="admin-metric-value">{messageMetrics.pendingMessages}</p>
+                <p className="admin-metric-description">awaiting reply</p>
               </div>
             </div>
           </div>
