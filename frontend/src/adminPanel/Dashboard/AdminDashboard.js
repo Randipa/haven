@@ -18,6 +18,7 @@ const AdminDashboard = () => {
     adminCount: 0,
     userCount: 0
   });
+  const [userPetCounts, setUserPetCounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -53,6 +54,16 @@ const AdminDashboard = () => {
       const userCount = users.filter(u => u.userRole === 'USER').length;
 
       setUserStats({ totalUsers, adminCount, userCount });
+
+      // Calculate pet count per user
+      const counts = users.map(u => {
+        const count = pets.filter(p => p.ownerName === u.name).length;
+        if (count > 0) {
+          return { name: u.name, location: u.location, count };
+        }
+        return null;
+      }).filter(Boolean);
+      setUserPetCounts(counts);
       
       setError(null);
     } catch (error) {
@@ -146,19 +157,19 @@ const AdminDashboard = () => {
           {/* Analytics Mini View */}
           <div className="admin-analytics-mini">
             <h2 className="admin-section-title">
-              <FaChartBar className="admin-section-icon" /> Registration Analytics
+              <FaChartBar className="admin-section-icon" /> User Pet Distribution
             </h2>
             <div className="admin-mini-charts">
               <div className="admin-mini-chart">
-                <PieChartComponent 
-                  data={dashboardData} 
+                <PieChartComponent
+                  data={userPetCounts}
                   title={null}
                   miniView={true}
                 />
               </div>
               <div className="admin-mini-chart">
-                <BarChartComponent 
-                  data={dashboardData} 
+                <BarChartComponent
+                  data={userPetCounts}
                   title={null}
                   miniView={true}
                 />
