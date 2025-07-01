@@ -134,7 +134,7 @@ const PieChartComponent = ({ data, title }) => {
           <div className="summary-card">
             <h4>Most Common Status</h4>
             <p className="highlight">
-              {chartData.length > 0 
+              {chartData.length > 0
                 ? chartData.reduce((prev, current) => (prev.value > current.value) ? prev : current).name
                 : 'N/A'
               }
@@ -144,6 +144,12 @@ const PieChartComponent = ({ data, title }) => {
             <h4>Total Entries</h4>
             <p className="highlight">
               {chartData.reduce((sum, item) => sum + item.value, 0)}
+            </p>
+          </div>
+          <div className="summary-card">
+            <h4>Pending Rate</h4>
+            <p className="highlight">
+              {data.totalPets > 0 ? ((data.pendingRequests / data.totalPets) * 100).toFixed(1) : 0}%
             </p>
           </div>
         </div>
