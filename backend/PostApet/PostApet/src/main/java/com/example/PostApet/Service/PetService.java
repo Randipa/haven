@@ -4,6 +4,7 @@ import com.example.PostApet.Model.PetModel;
 import com.example.PostApet.Model.User;
 import com.example.PostApet.Repository.PetRepository;
 import com.example.PostApet.Repository.UserRepository;
+import com.example.PostApet.Service.AdminActivityService;
 import com.example.PostApet.dto.PetDto;
 import com.example.PostApet.dto.QuizRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public abstract class PetService {
 
     @Autowired
     protected UserRepository userRepository;
+
+    @Autowired
+    protected AdminActivityService adminActivityService;
 
     public PetModel savePet(PetModel petModel) {
         return petRepository.save(petModel);
@@ -59,7 +63,11 @@ public abstract class PetService {
         PetModel pet = petRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pet not found"));
         pet.setRegStatus(status);
-        return petRepository.save(pet);
+        PetModel updated = petRepository.save(pet);
+        try {
+            adminActivityService.logActivity("Pet ID " + id + " status updated to " + status);
+        } catch (Exception ignored) {}
+        return updated;
     }
 
     public PetModel updatePet(int id, PetModel petModel) {
