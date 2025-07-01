@@ -19,6 +19,9 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
+    fetchRecentActivity();
+    const interval = setInterval(fetchRecentActivity, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
@@ -33,23 +36,14 @@ const AdminDashboard = () => {
       const rejectedRequests = pets.filter(pet => pet.regStatus === "Rejected").length;
       const pendingRequests = pets.filter(pet => !pet.regStatus || pet.regStatus === "Pending").length;
       
-      const recentActivity = pets
-        .slice(0, 5)
-        .map((pet, index) => ({
-          id: pet.id,
-          type: getActivityType(pet.regStatus),
-          message: getActivityMessage(pet),
-          time: `${index + 1} ${index === 0 ? 'hour' : 'hours'} ago`
-        }));
-
-      setDashboardData({
+      setDashboardData(prev => ({
         totalPets,
         pendingRequests,
         approvedRequests,
         rejectedRequests,
         totalMessages: 0,
-        recentActivity
-      });
+        recentActivity: prev.recentActivity
+      }));
       
       setError(null);
     } catch (error) {
@@ -57,6 +51,24 @@ const AdminDashboard = () => {
       setError('Failed to load dashboard data. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRecentActivity = async () => {
+    try {
+      const resp = await axiosInstance.get('/pets/recent?limit=5');
+      const activity = resp.data.map(pet => ({
+        id: pet.id,
+        type: getActivityType(pet.regStatus),
+        message: getActivityMessage(pet),
+        time: new Date().toLocaleTimeString(),
+      }));
+      setDashboardData(prev => ({
+        ...prev,
+        recentActivity: activity,
+      }));
+    } catch (err) {
+      console.error('Error fetching recent activity:', err);
     }
   };
 
