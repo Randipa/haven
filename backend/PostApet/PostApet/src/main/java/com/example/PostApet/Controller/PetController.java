@@ -5,6 +5,7 @@ import com.example.PostApet.Model.User;
 import com.example.PostApet.Repository.UserRepository;
 import com.example.PostApet.Service.FileStorageService;
 import com.example.PostApet.Service.PetService;
+import com.example.PostApet.Service.EmailService;
 import com.example.PostApet.dto.PetDto;
 import com.example.PostApet.dto.QuizRequest;
 import com.example.PostApet.dto.UserDto;
@@ -29,11 +30,13 @@ public class PetController {
     private final PetService petService;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
+    private final EmailService emailService;
 
-    public PetController(PetService petService, UserRepository userRepository, FileStorageService fileStorageService) {
+    public PetController(PetService petService, UserRepository userRepository, FileStorageService fileStorageService, EmailService emailService) {
         this.petService = petService;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
+        this.emailService = emailService;
     }
 
 
@@ -102,6 +105,10 @@ public class PetController {
             savedPet.setPhoto(photoPath);
             petService.savePet(savedPet); // Update with photo path
         }
+
+        emailService.sendEmail(user.getEmail(),
+                "Adoption Post Created",
+                "Your adoption post for '" + savedPet.getPetName() + "' has been created and is pending approval.");
 
         return ResponseEntity.ok("New pet added successfully");
     }
