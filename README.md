@@ -21,3 +21,6 @@ MAIL_PASSWORD # your SMTP password or app password
 ```
 
 If no variables are provided, the backend defaults to Gmail's SMTP host and port.
+
+The configured `MAIL_USERNAME` (or `spring.mail.username`) is used as the sender
+address for all outgoing emails.
