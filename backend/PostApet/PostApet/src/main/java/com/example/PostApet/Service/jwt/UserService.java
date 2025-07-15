@@ -22,10 +22,14 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
 
@@ -74,6 +78,11 @@ public class UserService implements UserDetailsService {
         }
 
         User updatedUser = userRepository.save(user);
+
+        emailService.sendEmail(user.getEmail(),
+                "Profile Updated",
+                "Your profile information has been updated.");
+
         return updatedUser.getUserDto();
     }
 
@@ -96,6 +105,11 @@ public class UserService implements UserDetailsService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         User updatedUser = userRepository.save(user);
+
+        emailService.sendEmail(user.getEmail(),
+                "Password Changed",
+                "Your password has been changed successfully.");
+
         return updatedUser.getUserDto();
     }
 
@@ -114,6 +128,10 @@ public class UserService implements UserDetailsService {
 
 
         // Delete user
+        emailService.sendEmail(user.getEmail(),
+                "Account Deleted",
+                "Your profile has been deleted from the system.");
+
         userRepository.delete(user);
         return true;
     }

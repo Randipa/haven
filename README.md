@@ -6,10 +6,12 @@ This repository contains a Spring Boot backend and a React frontend.
 
 The backend uses Spring Mail to send notification emails when:
 
+- A user logs in.
 - A user updates profile details.
 - A user changes their password.
+- A user deletes their profile.
 - A new adoption post is created.
-- An adoption post is approved.
+- An adoption post is approved or rejected.
 
 To enable email sending, configure the following environment variables before running the backend:
 

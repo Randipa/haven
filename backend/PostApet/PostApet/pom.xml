@@ -40,10 +40,16 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webflux</artifactId> <!-- Correct WebFlux starter -->
-		</dependency>
+                <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-webflux</artifactId> <!-- Correct WebFlux starter -->
+                </dependency>
+
+                <!-- Email support -->
+                <dependency>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-mail</artifactId>
+                </dependency>
 
 		<!-- Resilience4j dependencies -->
 		<dependency>
