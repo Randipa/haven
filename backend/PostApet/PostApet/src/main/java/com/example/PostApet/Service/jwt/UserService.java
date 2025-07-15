@@ -5,6 +5,7 @@ import com.example.PostApet.Repository.UserRepository;
 import com.example.PostApet.dto.UpdateProfileRequest;
 import com.example.PostApet.dto.UserDto;
 import com.example.PostApet.util.FileUploadUtil;
+import com.example.PostApet.Service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
