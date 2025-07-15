@@ -10,6 +10,7 @@ The backend uses Spring Mail to send notification emails when:
 - A user updates profile details.
 - A user changes their password.
 - A user deletes their profile.
+- An admin deletes a user profile.
 - A new adoption post is created.
 - An adoption post is approved or rejected.
 
