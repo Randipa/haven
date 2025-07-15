@@ -7,6 +7,7 @@ import com.example.PostApet.dto.UserDto;
 import com.example.PostApet.Model.User;
 import com.example.PostApet.Repository.UserRepository;
 import com.example.PostApet.Service.auth.AuthService;
+import com.example.PostApet.Service.EmailService;
 import com.example.PostApet.util.JwtUtil;
 import jakarta.persistence.EntityExistsException;
 import org.springframework.http.HttpStatus;
@@ -35,13 +36,20 @@ public class AuthController {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final EmailService emailService;
 
-    public AuthController(AuthService authService, AuthenticationManager authenticationManager, UserRepository userRepository, JwtUtil jwtUtil, UserService userService) {
+    public AuthController(AuthService authService,
+                          AuthenticationManager authenticationManager,
+                          UserRepository userRepository,
+                          JwtUtil jwtUtil,
+                          UserService userService,
+                          EmailService emailService) {
         this.authService = authService;
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.jwtUtil = jwtUtil;
         this.userService = userService;
+        this.emailService = emailService;
     }
 
     @PostMapping("/signup")
@@ -79,6 +87,10 @@ public class AuthController {
         authenticationResponse.setUserRole(optionalUser.get().getUserRole());
         authenticationResponse.setUserId(optionalUser.get().getId());
         authenticationResponse.setEmail(optionalUser.get().getEmail());
+
+        emailService.sendEmail(optionalUser.get().getEmail(),
+                "Login Notification",
+                "You have logged in to your account.");
 
         return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
     }
