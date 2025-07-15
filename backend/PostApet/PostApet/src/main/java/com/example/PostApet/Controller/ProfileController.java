@@ -135,4 +135,22 @@ public class ProfileController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteAccount(
+            @RequestParam String password,
+            Principal principal) {
+
+        String email = principal.getName();
+
+        try {
+            boolean deleted = userService.deleteAccount(email, password);
+            if (deleted) {
+                return ResponseEntity.ok().build();
+            }
+            return ResponseEntity.badRequest().body("Failed to delete account");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

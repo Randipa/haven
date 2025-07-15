@@ -4,14 +4,12 @@ import com.example.PostApet.Model.PetModel;
 import com.example.PostApet.Model.User;
 import com.example.PostApet.Repository.PetRepository;
 import com.example.PostApet.Repository.UserRepository;
-import com.example.PostApet.Service.AdminActivityService;
-import com.example.PostApet.Service.EmailService;
 import com.example.PostApet.dto.PetDto;
 import com.example.PostApet.dto.QuizRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,12 +22,6 @@ public abstract class PetService {
 
     @Autowired
     protected UserRepository userRepository;
-
-    @Autowired
-    protected AdminActivityService adminActivityService;
-
-    @Autowired
-    protected EmailService emailService;
 
     public PetModel savePet(PetModel petModel) {
         return petRepository.save(petModel);
@@ -67,17 +59,7 @@ public abstract class PetService {
         PetModel pet = petRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pet not found"));
         pet.setRegStatus(status);
-        PetModel updated = petRepository.save(pet);
-        try {
-            adminActivityService.logActivity("Pet ID " + id + " status updated to " + status);
-            if ("Approved".equalsIgnoreCase(status) && pet.getContactEmail() != null) {
-                emailService.sendEmail(
-                        pet.getContactEmail(),
-                        "Adoption Post Approved",
-                        "Your adoption post for '" + pet.getPetName() + "' has been approved.");
-            }
-        } catch (Exception ignored) {}
-        return updated;
+        return petRepository.save(pet);
     }
 
     public PetModel updatePet(int id, PetModel petModel) {

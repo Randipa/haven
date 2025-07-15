@@ -1,14 +1,18 @@
 package com.example.PostApet.Controller;
 
 import com.example.PostApet.Model.PetModel;
+import com.example.PostApet.Model.Species;
 import com.example.PostApet.Model.User;
+import com.example.PostApet.Repository.SpeciesRepository;
 import com.example.PostApet.Repository.UserRepository;
 import com.example.PostApet.Service.FileStorageService;
 import com.example.PostApet.Service.PetService;
-import com.example.PostApet.Service.EmailService;
 import com.example.PostApet.dto.PetDto;
 import com.example.PostApet.dto.QuizRequest;
 import com.example.PostApet.dto.UserDto;
+import org.springframework.core.io.Resource; // Correct import
+// Remove jakarta.annotation.Resource
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.IOException;
 import java.security.Principal;
@@ -30,13 +35,12 @@ public class PetController {
     private final PetService petService;
     private final UserRepository userRepository;
     private final FileStorageService fileStorageService;
-    private final EmailService emailService;
-
-    public PetController(PetService petService, UserRepository userRepository, FileStorageService fileStorageService, EmailService emailService) {
+    private final SpeciesRepository speciesRepository;
+    public PetController(PetService petService, UserRepository userRepository, FileStorageService fileStorageService, SpeciesRepository speciesRepository) {
         this.petService = petService;
         this.userRepository = userRepository;
         this.fileStorageService = fileStorageService;
-        this.emailService = emailService;
+        this.speciesRepository = speciesRepository;
     }
 
 
@@ -106,10 +110,6 @@ public class PetController {
             petService.savePet(savedPet); // Update with photo path
         }
 
-        emailService.sendEmail(user.getEmail(),
-                "Adoption Post Created",
-                "Your adoption post for '" + savedPet.getPetName() + "' has been created and is pending approval.");
-
         return ResponseEntity.ok("New pet added successfully");
     }
 
@@ -117,12 +117,6 @@ public class PetController {
     @GetMapping("/getAll")
     public List<PetDto> getAllPets() {
         return petService.getAllPets();
-    }
-
-    @GetMapping("/recent")
-    public ResponseEntity<List<PetDto>> getRecentPets(@RequestParam(defaultValue = "5") int limit) {
-        List<PetDto> pets = petService.getRecentPets(limit);
-        return ResponseEntity.ok(pets);
     }
 
     @GetMapping("/get/{id}")
@@ -235,6 +229,74 @@ public class PetController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return ResponseEntity.ok(user.getUserDto());
     }
+
+    @PostMapping(value = "/add/by-name", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> addPet(
+            @RequestParam(value = "speciesId") Long speciesId,
+            @RequestParam(value = "specie") String specie,
+            @RequestParam(value = "petName") String petName,
+            @RequestParam(value = "breed") String breed,
+            @RequestParam(value = "location") String location,
+            @RequestParam(value = "age") String age,
+            @RequestParam(value = "gender") String gender,
+            @RequestParam(value = "reason") String reason,
+            @RequestParam(value = "ifTemp") String ifTemp,
+            @RequestParam(value = "justify") String justify,
+            @RequestParam(value = "vaccinationStatus") String vaccinationStatus,
+            @RequestParam(value = "colorMarkings") String colorMarkings,
+            @RequestParam(value = "size") String size,
+            @RequestParam(value = "spayedNeutered") boolean spayedNeutered,
+            @RequestParam(value = "medicalHistory") String medicalHistory,
+            @RequestParam(value = "behavior") String behavior,
+            @RequestParam(value = "specialNeeds") String specialNeeds,
+            @RequestParam(value = "adoptionFee") double adoptionFee,
+            @RequestParam(value = "adoptionFeeFree") boolean adoptionFeeFree,
+            @RequestParam(value = "photo", required = false) MultipartFile photo,
+            Principal principal) throws IOException {
+
+        // Get current user
+        String email = principal.getName();
+        User user = userRepository.findFirstByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Get species
+        Species species = speciesRepository.findById(speciesId)
+                .orElseThrow(() -> new RuntimeException("Species not found"));
+
+        // Create new pet
+        PetModel petModel = new PetModel();
+        petModel.setSpecie(specie);
+        petModel.setPetName(petName);
+        petModel.setBreed(breed);
+        petModel.setLocation(location);
+        petModel.setAge(age);
+        petModel.setGender(gender);
+        petModel.setReason(reason);
+        petModel.setIfTemp(ifTemp);
+        petModel.setJustify(justify);
+        petModel.setUser(user);
+        petModel.setVaccinationStatus(vaccinationStatus);
+        petModel.setColorMarkings(colorMarkings);
+        petModel.setSize(size);
+        petModel.setSpayedNeutered(spayedNeutered);
+        petModel.setMedicalHistory(medicalHistory);
+        petModel.setBehavior(behavior);
+        petModel.setSpecialNeeds(specialNeeds);
+        petModel.setAdoptionFee(adoptionFeeFree ? 0 : adoptionFee);
+        petModel.setAdoptionFeeFree(adoptionFeeFree);
+
+
+        // Handle image upload
+        if (photo != null && !photo.isEmpty()) {
+            String photoPath = fileStorageService.store(photo, "pet-images/" + petModel.getId());
+            petModel.setPhoto(photoPath);
+        }
+
+        petService.savePet(petModel);
+        return ResponseEntity.ok("New pet added successfully");
+    }
+
+
 
 
 }

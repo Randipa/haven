@@ -4,7 +4,6 @@ import com.example.PostApet.Model.User;
 import com.example.PostApet.Repository.UserRepository;
 import com.example.PostApet.dto.UpdateProfileRequest;
 import com.example.PostApet.dto.UserDto;
-import com.example.PostApet.Service.EmailService;
 import com.example.PostApet.util.FileUploadUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,12 +22,10 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
     }
 
 
@@ -77,9 +74,6 @@ public class UserService implements UserDetailsService {
         }
 
         User updatedUser = userRepository.save(user);
-        emailService.sendEmail(updatedUser.getEmail(),
-                "Profile Updated",
-                "Your profile details were successfully updated.");
         return updatedUser.getUserDto();
     }
 
@@ -102,9 +96,6 @@ public class UserService implements UserDetailsService {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         User updatedUser = userRepository.save(user);
-        emailService.sendEmail(updatedUser.getEmail(),
-                "Password Changed",
-                "Your account password was successfully updated.");
         return updatedUser.getUserDto();
     }
 
@@ -112,4 +103,18 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
+    public boolean deleteAccount(String email, String password) {
+        User user = userRepository.findFirstByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Verify password
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("Incorrect password");
+        }
+
+
+        // Delete user
+        userRepository.delete(user);
+        return true;
+    }
 }
