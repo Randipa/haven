@@ -126,5 +126,18 @@ public class AuthController {
         }
     }
 
+    /**
+     * Delete a user by ID. Intended for administrative use.
+     */
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        try {
+            userService.deleteUserById(userId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
 }

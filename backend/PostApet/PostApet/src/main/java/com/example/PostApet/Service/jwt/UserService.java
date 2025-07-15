@@ -118,6 +118,22 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
+    /**
+     * Delete a user profile by ID and notify the user via email.
+     *
+     * @param userId ID of the user to delete
+     */
+    public void deleteUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        emailService.sendEmail(user.getEmail(),
+                "Account Deleted",
+                "Your profile has been deleted from the system.");
+
+        userRepository.delete(user);
+    }
+
     public boolean deleteAccount(String email, String password) {
         User user = userRepository.findFirstByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
